@@ -1,0 +1,49 @@
+#!/bin/bash
+
+# Author: Sergio Chaves Garcia-Mascaraque
+# Swansea, Wales, United Kingdom
+# Noviembre de 2019
+
+# This script is a modification of the previous gnp2tex
+# Now it just relies on gnuplot commands, not latex
+
+nameGnuplot="$1"
+savePDF="$2"
+
+echo "
+# Set the terminal to produce the latex results
+set terminal lua tikz standalone size 20cm,14cm
+
+# Set the margins in the figure
+set tmargin at screen 0.90
+set bmargin at screen 0.10
+set rmargin at screen 0.95
+set lmargin at screen 0.10
+
+set output 'temp.tex'
+" > ./wrapper.gn
+
+# Copy the gnuplot script into the wrapper file
+cat ${nameGnuplot} >> ./wrapper.gn
+
+# Produce the figure file
+gnuplot ./wrapper.gn
+
+# Produce the pdf file
+pdflatex ./temp.tex
+
+if [ -z "${savePDF}" ]; then
+    pdfName=$( echo ${nameGnuplot} | sed 's/.gn/.pdf/g'  )
+else
+    pdfName=${savePDF}
+fi
+
+mv ./temp.pdf ${pdfName}
+
+# Remove unwanted files
+rm ./wrapper.gn
+rm temp.aux
+rm temp.gnuploterrors
+rm temp.tex
+rm temp.log
+rm temp-gnuplottex*

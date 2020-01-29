@@ -1,0 +1,16 @@
+## AUTHOR: SERGIO CHAVES GARCIA-MASCARAQUE
+## OCTUBRE DE 2018
+## E-MAIL: SERGIOZTESKATE@GMAIL.COM
+
+set colors classic
+
+set xlabel '$x$'
+set ylabel 'My pretty and awesome function of x'        # Non -math style
+
+plot sin(x) ls 2 lw 2 title '$\sin(x) - Math style$', \
+     cos(x) ls 3 lw 2 title 'cos(x) - Non-Math style'
+
+## IT IS ALWAYS RECOMMENDED TO USE % "$ gnuplot -p myFile.gn" BEFORE CALLING THE
+## SCRIPT generatepdfLatex.sh, YOU WILL SEE A PREVIEW OF THE DATA AND LOCATE
+## BETTER ANY ERROR ASSOCIATED TO YOUR CODE.
+
