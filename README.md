@@ -8,6 +8,6 @@ folder, there should be a fully functional collection of scripts.
 data into a single file. Each file will contain N_C x N_S statistics of the
 particle to be analysed.
 
-..* *extractEffMass:** Collection of scripts to extract the effective mass solving
+..* **extractEffMass:** Collection of scripts to extract the effective mass solving
 the cosh function and plotting the data into a pdf using gnp2tex.
 
