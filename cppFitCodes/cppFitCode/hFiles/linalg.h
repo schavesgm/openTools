@@ -1,8 +1,6 @@
-//------------------------------------------------------------------------------------------------//
 //    AUTHOR : SERGIO CHAVES GARCÍA-MASCARAQUE
 //    E-MAIL : SERGIOZTESKATE@GMAIL.COM
 //    DICIEMBRE DE 2018, SWANSEA, WALES - MADRID, SPAIN
-//------------------------------------------------------------------------------------------------//
 
 
 #ifndef LINALG_H
@@ -12,23 +10,26 @@
 #include "./loadData.h"
 
 struct LUcont {         // Structure containing the LU decomposition
-    double* lMat; 
+    double* lMat;
     double* uMat;
     unsigned rowSize;
 };
 
 struct LUcont LUDecompose( const double* inMat, const unsigned rowSize ) {
     /*
-     * Function that returns the LU decomposition using Doolittle's method
-     *
-     * args:
-     * const double*    : matrix to be decompose, must be folded into an array
-     * const unsigned   : dimensions of the matrix, must be a square matrix
-     *
-     * return:
-     * struct LUcont    : structure containing lMat (L), uMat (U) and rowSize as the dimension
-     *
-     */
+       Function that returns the LU decomposition using Doolittle's method.
+
+        Args:
+            const double*:
+                Matrix to be decomposed, must be vectorised.
+            const unsigned:
+                Dimension of the matrix, must be a square matrix.
+
+        Return:
+            struct LUcont:
+                Structure containing the LU decomposition of the initial
+                matrix.
+    */
 
     // Generate the pointers that will hold the LU decomposition
     double* uMat = new double[rowSize*rowSize];
@@ -38,7 +39,7 @@ struct LUcont LUDecompose( const double* inMat, const unsigned rowSize ) {
     for( unsigned i = 0; i < rowSize; i++ ) {
         for( unsigned j = 0; j < rowSize; j++ ) {
             uMat[i*rowSize+j] = 0.0;
-            if( i == j ) 
+            if( i == j )
                 lMat[i*rowSize+j] = 1.0;
             else
                 lMat[i*rowSize+j] = 0.0;
@@ -47,7 +48,7 @@ struct LUcont LUDecompose( const double* inMat, const unsigned rowSize ) {
 
     // Generate the decomposition
     double auxVar;
-    for( unsigned i = 0; i < rowSize; i++ ) { 
+    for( unsigned i = 0; i < rowSize; i++ ) {
         for( unsigned j = 0; j < rowSize; j++ ) {
             if( i <= j ) {
                 auxVar = 0.0;
@@ -56,12 +57,13 @@ struct LUcont LUDecompose( const double* inMat, const unsigned rowSize ) {
                 }
                 uMat[i*rowSize+j] = inMat[i*rowSize+j] - auxVar;
             }
-            if( i > j ) { 
+            if( i > j ) {
                 auxVar = 0.0;
                 for( unsigned k = 0; k < j; k++ ) {
                     auxVar += lMat[i*rowSize+k] * uMat[k*rowSize+j];
                 }
-                lMat[i*rowSize+j] = ( 1 / uMat[j*rowSize+j] ) * ( inMat[i*rowSize+j] - auxVar );
+                lMat[i*rowSize+j] = ( 1 / uMat[j*rowSize+j] ) *
+                                    ( inMat[i*rowSize+j] - auxVar );
             }
         }
     }
@@ -71,17 +73,22 @@ struct LUcont LUDecompose( const double* inMat, const unsigned rowSize ) {
 }
 
 double* solveLU( const double* inMat, const double* b, const unsigned rowSize ) {
-    /* 
-     * Function that returns the values that are solution of A*x = b
-     *
-     * args:
-     * const double*    : Pointer to array containing the elements of the matrix A
-     * const double*    : Pointer to array containing the elements of the vector b
-     * const unsigned   : Dimension of the space
-     *
-     * return:
-     * double*          : Pointer containing the values that solve the system
-     */
+    /*
+       Function that returns the values that are solution of A * x = b.
+
+        Args:
+            const double*:
+                Matrix representing A, must be vectorised.
+            const double*:
+                Vector representing b.
+            const unsigned:
+                Dimension of the matrix A and b, note that A has to be a
+                square matrix.
+
+        Return:
+            double*:
+                Pointer representing the vector x that fullfils A * x = b
+    */
 
     // Get the LU decomposition of the matrix
     struct LUcont LU = LUDecompose( inMat, rowSize );
@@ -89,7 +96,7 @@ double* solveLU( const double* inMat, const double* b, const unsigned rowSize ) 
     // We must solve y and x using Ly = b, Ux = y
     double* xSol = new double[rowSize];
     double* ySol = new double[rowSize];
-    
+
     for( unsigned i = 0; i < rowSize; i++ ) {
         xSol[i] = 0.0;
         ySol[i] = 0.0;
@@ -107,7 +114,7 @@ double* solveLU( const double* inMat, const double* b, const unsigned rowSize ) 
 
     // Then we solve for Ux = y
     unsigned auxIter = rowSize - 1;
-    for( unsigned i = 0; i < rowSize; i++ ) { 
+    for( unsigned i = 0; i < rowSize; i++ ) {
         auxVar = 0.0;
         for( unsigned j = i - 1; j <= rowSize; j++ ) {
             auxVar += LU.uMat[auxIter*rowSize+j] * xSol[j];
@@ -115,31 +122,33 @@ double* solveLU( const double* inMat, const double* b, const unsigned rowSize ) 
         xSol[auxIter] = ( 1 / LU.uMat[auxIter*rowSize+auxIter] ) * ( ySol[auxIter] - auxVar );
         auxIter -= 1;
     }
-    
+
     return xSol;
 }
 
 double* auxSolveLU( const struct LUcont LU, const double* b ) {
     /*
-     * Function that returns the value of the system Ax = b given the LU decompositon of A. This
-     * routine is generated to recycle the LU decomposition while inverting the matrix. It is not
-     * intended to be used while trying to solve the system
-     *
-     * args:
-     * const struct LUcont  : LUcont structure containing the LU decomposition of a matrix A
-     * const double*        : Pointer to array containing the elements of the vector b
-     *
-     * return:
-     * double*              : solution of the system Ax = b
-     */
-    
+       Function that returns the values that are solution of A * x = b given
+       the LU decomposition of the matrix A. It is written to be called by
+       another function.
+
+        Args:
+            const struct LUcont*:
+                Structure containg the LU decomposition of A.
+            const double*:
+                Vector representing b.
+        Return:
+            double*:
+                Pointer representing the vector x that fullfils A * x = b
+    */
+
     // Get the dimension of the space
     unsigned rowSize = LU.rowSize;
 
     // We must solve y and x using Ly = b, Ux = y
     double* xSol = new double[rowSize];
     double* ySol = new double[rowSize];
-    
+
     for( unsigned i = 0; i < rowSize; i++ ) {
         xSol[i] = 0.0;
         ySol[i] = 0.0;
@@ -157,41 +166,48 @@ double* auxSolveLU( const struct LUcont LU, const double* b ) {
 
     // Then we solve for Ux = y
     unsigned auxIter = rowSize - 1;
-    for( unsigned i = 0; i < rowSize; i++ ) { 
+    for( unsigned i = 0; i < rowSize; i++ ) {
         auxVar = 0.0;
         for( unsigned j = i - 1; j <= rowSize; j++ ) {
             auxVar += LU.uMat[auxIter*rowSize+j] * xSol[j];
         }
-        xSol[auxIter] = ( 1 / LU.uMat[auxIter*rowSize+auxIter] ) * ( ySol[auxIter] - auxVar );
+        xSol[auxIter] = ( 1 / LU.uMat[auxIter*rowSize+auxIter] )
+                        * ( ySol[auxIter] - auxVar );
         auxIter -= 1;
     }
-    
+
     return xSol;
 }
 
 double* invertMat( const double* inMat, const unsigned rowSize ) {
     /*
-     * Function that calculates the inverse matrix of a given non-singular matrix whose determinant
-     * is different from zero. It is based on the LU decomposition, implemented following Doolittle
-     * method. We would like to obtain a matrix B such that A * B = 1
-     *
-     * args:
-     * const double*    : Pointer to array containing the elements of the matrix A that we want to
-     *                    invert. A must be a square matrix.
-     * const unsigned   : Dimension of the space in which A lives
-     *
-     * return:
-     * double*          : Pointer to array containing the elements of the inverse matrix A^{-1}
-     */
-    
+       Function that returns the inverse matrix of the matrix A. The matrix
+       given has to be non-singlular, det(A) != 0. It is based on the LU
+       decomposition, it finds the matrix B such that, A * B = 1
+
+        Args:
+            const double*:
+                Matrix representing A, must be vectorised.
+            const unsigned:
+                Dimnesion of the matrix A. A must be a square matrix.
+
+        Return:
+            double*:
+                Pointer representing the matrix B such that A * B = 1. The
+                matrix if vectorised. To access the element (i,j) just use
+                B[i * rowSize + j]
+    */
+
     // Get the LU decomposition of inMat
     struct LUcont LU = LUDecompose( inMat, rowSize );
 
     // We need to solve N equations
     double* invMat = new double[rowSize*rowSize];
 
-    double* auxSol = new double[rowSize];   // Auxiliar pointer that will hold the solution
-    double* idVec = new double[rowSize];    // Identity matrix vector in each case
+    // Auxiliar pointer that will hold the solution
+    double* auxSol = new double[rowSize];
+    // Identity matrix vector in each case
+    double* idVec = new double[rowSize];
 
     for( unsigned i = 0; i < rowSize; i++ ) {
         // Fill the solve vector automatically
@@ -201,18 +217,15 @@ double* invertMat( const double* inMat, const unsigned rowSize ) {
             else
                 idVec[j] = 1.0;
         }
-        
+
         // Solve the equation
-        auxSol = auxSolveLU( LU, idVec );   // We use auxSolveLU as it recycles LU decomposition
+        auxSol = auxSolveLU( LU, idVec );
         for( unsigned k = 0; k < rowSize; k++ )
             invMat[k*rowSize+i] = auxSol[k];
     }
-    
+
     return invMat;
 }
-    
-
-
 
 #endif
 

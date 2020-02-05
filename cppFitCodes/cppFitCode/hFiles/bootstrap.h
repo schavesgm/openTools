@@ -1,8 +1,6 @@
-//------------------------------------------------------------------------------------------------//
 //    AUTHOR : SERGIO CHAVES GARCÍA-MASCARAQUE
 //    E-MAIL : SERGIOZTESKATE@GMAIL.COM
 //    DICIEMBRE DE 2018, SWANSEA, WALES - MADRID, SPAIN
-//------------------------------------------------------------------------------------------------//
 
 
 #ifndef BOOTSTRAP_H
@@ -19,6 +17,26 @@ double meanValue( const double*, const unsigned );
 struct myMat pickAnalyzeBootstrap( const myMat inFile, const unsigned timePoints,
                               const unsigned inPosFit, unsigned ouPosFit,
                               int seedAux ) {
+    /*
+        Function to generate a bootstrapped resample from a given set of
+        values.
+
+        Args:
+            const struct myMat:
+                Input file to be resampled.
+            const unsigned:
+                Number of time points of the configuration.
+            const unsigned:
+                Initial time to resample. It must hold inPosFit < timePoints
+            unsigned:
+                Final time to resample.
+            int:
+                Seed to feed the random engine.
+
+        Return:
+            struct myMat:
+                Structure containing the resampled estimation.
+    */
 
     if( ouPosFit <= inPosFit )      // In order to avoid errors
         ouPosFit = timePoints;
@@ -42,9 +60,10 @@ struct myMat pickAnalyzeBootstrap( const myMat inFile, const unsigned timePoints
     int bootChoice, auxCol = 0;
     for( unsigned i = 0; i < numEnsemble; i++ ) {
         bootChoice = dist(rng);
-        for( unsigned j = inPosFit; j < ouPosFit; j++ ) {   // We iterate from one time to another
-            resampPoints[i*pointsUsed+auxCol] = inFile.m_Matrix[bootChoice*timePoints+j];
-            //std::cout << resampPoints[i*pointsUsed+auxCol] << " ";
+        // We iterate from one time to another
+        for( unsigned j = inPosFit; j < ouPosFit; j++ ) {
+            resampPoints[i*pointsUsed+auxCol] =
+                    inFile.m_Matrix[bootChoice*timePoints+j];
             auxCol += 1;
         }
         auxCol = 0;
@@ -57,7 +76,6 @@ struct myMat pickAnalyzeBootstrap( const myMat inFile, const unsigned timePoints
         for( unsigned j = 0; j < numEnsemble; j++ ) {
             bootstPoints[auxTime] += resampPoints[j*pointsUsed+i] / numEnsemble;
         }
-        //std::cout << bootstPoints[auxTime] << std::endl;
         auxTime += 1;
     }
 
@@ -68,20 +86,18 @@ struct myMat pickAnalyzeBootstrap( const myMat inFile, const unsigned timePoints
 
 double* bootStrap( const myMat inVec, const unsigned numBoots ) {
     /*
-     * Function that calculates the mean value of a resampled number of statistics. It implements
-     * the bootstrap method to generate better understanding of the data obtained. This method
-     * works on a sample of secondary observables calculated. For example, imagine that we have
-     * calculated N times some fitted coefficients using different ensembles. This method allows
-     * us to calculate the bootstrap of those values. It is not useful to obtain a bootstrapped
-     * approach to fitting coefficients calculated from the same data set.
-     *
-     * args:
-     * const myMat      : Structure containing the data and its dimensions
-     * const unsigned   : Number of resamplings that we woud like to do
-     *
-     * return:
-     * double*          : Mean value of the resampled quantities
-     */
+        Function to generate the central value of a data using bootstrap.
+
+        Args:
+            const struct myMat:
+                Input file to be resampled.
+            const unsigned:
+                Number of bootstrap iterations.
+
+        Return:
+            double*:
+                Pointer containing the resampled estimation.
+    */
 
     unsigned numPoints = inVec.rowSize;
 
@@ -108,15 +124,18 @@ double* bootStrap( const myMat inVec, const unsigned numBoots ) {
 
 double meanValue( const double* inPoint, const unsigned numPoints ) {
     /*
-     * Function that calculates the mean value of the vector given.
-     *
-     * args:
-     * double* inPoint    : input vector from which we want to calculate the mean value
-     * unsigned numPoints : number of points contained in the vector.
-     *
-     * return:
-     * double             : mean value of the pointer to array given
-     */
+       Function that calculates the average of a given vector.
+
+        Args:
+            const double*:
+                Input pointer from which we would like to generate the average.
+            const unsigned:
+                Dimension of the vector.
+
+        Return:
+            double:
+                Average of the vector.
+    */
 
     double retMean = 0.0;
     for( unsigned i = 0; i < numPoints; i++ )
@@ -127,14 +146,19 @@ double meanValue( const double* inPoint, const unsigned numPoints ) {
 
 double stdeValue( const double* inPoint, const unsigned numPoints ) {
     /*
-     * Function that calculates the standard deviation of the vector given.
-     *
-     * double* inPoint    : input vector from which we want to calculate the std deviation
-     * unsigned numPoints : number of points contained in the vector
-     *
-     * return:
-     * double             : standard deviation of the pointer to array given
-     */
+       Function that calculates the standard deviation of a given vector.
+
+        Args:
+            const double*:
+                Input pointer from which we would like to generate the average.
+            const unsigned:
+                Dimension of the vector.
+
+        Return:
+            double:
+                Standard deviation of the vector.
+    */
+
     double retStde = 0.0;
     double meanVal = meanValue( inPoint, numPoints );   // We need the mean value
     for( unsigned i = 0; i < numPoints; i++ )
@@ -145,15 +169,18 @@ double stdeValue( const double* inPoint, const unsigned numPoints ) {
 
 struct myMat covMat( struct myMat inVal ) {
     /*
-     * Function that calculates the covariance matrix given the errors, i.e, it calculates the
-     * matrix containing \Sigma = \sqrt{ \sigma_i * \sigma_j }
-     *
-     * args:
-     * struct myMat       : Matrix containing the errors of the quantities
-     *
-     * return:
-     * double*            : Pointer to array containing the elements of the matrix
-     */
+       Function that calculates the covariance matrix of a vector, that is,
+
+                    \Sigma_{ij} = \sqrt( y_i * y_j }.
+
+        Args:
+            struct myMat:
+                Structure containing the data.
+
+        Return:
+            struct myMat:
+                Structure containing the covariance matrix of the data provided..
+    */
 
     // Get the dimension of the vector
     unsigned rowSize = inVal.rowSize;

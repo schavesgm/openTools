@@ -1,8 +1,6 @@
-//------------------------------------------------------------------------------------------------//
 //    AUTHOR : SERGIO CHAVES GARCÍA-MASCARAQUE
 //    E-MAIL : SERGIOZTESKATE@GMAIL.COM
 //    DICIEMBRE DE 2018, SWANSEA, WALES - MADRID, SPAIN
-//------------------------------------------------------------------------------------------------//
 
 
 #ifndef SIMPLEX_H
@@ -21,43 +19,56 @@ void orderSimplex( double* ,double* ,const unsigned );
 void reordMat( double* ,double* ,const unsigned* ,const unsigned );
 void centrMat( double*, double*, const unsigned );
 
-//
+
 struct GetVal {             // Structure to return various values from function
     double* optmPoint;
     double  optmEval;
 };
 
 template<class TargetFunc>
-double chiSquare( TargetFunc f, 
-                  double* params, 
-                  myMat xData, 
-                  myMat yData, 
+double chiSquare( TargetFunc f,
+                  double* params,
+                  myMat xData,
+                  myMat yData,
                   myMat yError,
                   const unsigned matVec) {
     /*
-     * Function that calculates the chiSquare function to minimize. It uses two definitions.
-     * The error function, where errors in the y Axis are not taken into account and the maximum
-     * likelihood definition, where the errors weight each value.
-     *
-     * TargetFunc f : target function to fit, must return a double and be able to accept a pointer
-     *                with the parameters and a double xData
-     * myMat xData  : object in myMat structure containing the points in the x Axis, must have 
-     *                the number of rows included in the definition.
-     * myMat yData  : object in myMat structure containing the points measured in the y Axis. Must
-     *                have the number of rows included in the definition. The element colSize 
-     *                contained in the definition of yData must have the dimension of the parameter
-     *                space that we would like to fit to calculate the degrees of freedom of the 
-     *                problem.
-     * myMat yError : object in myMat structure containing the errors in the measurements. In the 
-     *                case of number of columns given == 0 it selects error function to minimize.
-     *                If the error provided is the covariance matrix it takes into account 
-     *                correlations in the data.
-     * unsigned     : flag that notifies when you are using a vector or a matrix. matVec = 0 means
-     *                that you are passing a vector, matVec = 1 means that you are passing a matrix
-     *
-     * return double: value of the function at the points given
-     */
-    
+        Function that calculates the chiSquare function to minimize. It uses three
+        definitions:
+
+                    chiSquare = \sum_i A * ( yDat_i - f( xDat_i, omega ) ) ^ 2
+            * Error function:
+                Error in the yAxis are not taken into account. A = 1
+            * Maximum likelihood:
+                The errors weight each value. A = 1 / diag( yError )
+            * Maximum likelihood correlation:
+                The chiSquare takes into account the correlation between data.
+                A = 1 / corr( yError, yError )
+
+        Args:
+            TargetFunc:
+                Function to be evaluated in the chiSquare. It must return a
+                double and accept a pointer with the paramets and xData.
+            double*:
+                Parameters omega to evaluate the chiSquare to.
+            struct myMat:
+                Data in the x axis, it represents xDat
+            struct myMat:
+                Data in the y axis, it represents yDat, that is, the measurements.
+            struct myMat:
+                Errors of the measurements. It represents yError.
+            const unsigned:
+                Flag that tells the problem if you are using a vector or a matrix.
+                It is only useful for the maximum likelihood values.
+
+        Return:
+            double:
+                Value of the chiSquare for the experimental data provided and
+                the function given with the parameters of the function being
+                omega.
+
+    */
+
     unsigned rowSize = yData.rowSize;
     unsigned dimParam = yData.colSize;
 
@@ -72,7 +83,8 @@ double chiSquare( TargetFunc f,
     }
     if( matVec == 1 ) { // Maximum likelihood without correlation
         for( unsigned i = 0; i < rowSize; i++ )  {
-            auxVal = ( f(params,xData.m_Matrix[i]) - yData.m_Matrix[i] ) / yError.m_Matrix[i]; 
+            auxVal = ( f(params,xData.m_Matrix[i]) - yData.m_Matrix[i] ) /
+                    yError.m_Matrix[i];
             evalChiSq += std::pow( auxVal, 2 );
         }
     }
@@ -91,66 +103,85 @@ double chiSquare( TargetFunc f,
 
 
 template<class TargetFunc>
-struct GetVal fitNM( TargetFunc f, 
+struct GetVal fitNM( TargetFunc f,
                      myMat xData,
                      myMat yData,
                      myMat yError,
-                     double* initGuess, 
+                     double* initGuess,
                      const double* expGuess,
                      const int dimSpace,
                      int seedAux,
                      const unsigned matVec,
                      const int maxIter = 1e8) {
     /*
-     * TargetFunc f : target function to fit, must return a double and be able to accept a pointer
-     *                with the parameters and a double xData
-     * myMat xData  : object in myMat structure containing the points in the x Axis, must have 
-     *                the number of rows included in the definition
-     * myMat yData  : object in myMat structure containing the points measured in the y Axis. Must
-     *                have the number of rows included in the definition
-     * myMat yError : object in myMat structure containing the errors in the measurements. In the 
-     *                case of number of columns given == 0 it selects error function to minimize
-     * double* iniGuess : pointer to double array that contains initial guess to the optimization
-     * double* expGuess : pointer to double array containing the 'error' in each parameter space.
-     *                     This means that we expect the value to be around that value
-     * const int dimSpace  : integer containing the dimension of the parameter space
-     * const int maxIter  : maximum number of iterations allowed in the calculation
-     *
-     * return struct    : Return a structure containing the double pointer with the points obtained
-     *                    in the optimization and a doube containing the value of the function 
-     *                    at the most optimized points.
-     */
-    
+        Function that returns the fitted parameters for a given function
+        knowing the experimental data. It implements a Nelder-Mead algorithm
+        to fit the data.
+
+        Args:
+            TargetFunc:
+                Target function to fit. It must return a double and be able to
+                accpet a pointer with the parameters and a double xData.
+            struct myMat:
+                Structure containing the points in the x axis.
+            struct myMat:
+                Structure containing the results of the experiment that we
+                would like to fit the function to.
+            struct myMat:
+                Structure containing the errors in the experiments.
+            double*:
+                Pointer containing the initial guess for the parameters.
+            const double*:
+                Pointer containing the volume in which we locate the initial
+                simplex.
+            const int:
+                Dimension of the parameter space.
+            int:
+                Seed for the random engine.
+            const unsigned:
+                Flag to check if we are using a matrix or a vector inside the
+                chiSquare calculation.
+            const int:
+                Maximum number of iterations in the calculation.
+
+        Return:
+            struct GetVal:
+                Structure containing the fitted parameters that minimize the
+                chiSquare function. It also returns the value of the chiSquare
+                at the produced estimation of the parameters.
+
+    */
+
     // INITIALIZE THE RANDOM ENGINE
     typedef std::mt19937 MyRng;
-    // uint32_t seed_val = seedAux; 
+    // uint32_t seed_val = seedAux;
     MyRng rng;
     rng.seed(time(0) + seedAux);
     std::uniform_real_distribution<double> dist(-1,1);
-    
+
     // DEFINE THE CONSTANTS OF THE ALGORITHM
     double alpha = 1.0;
     double gamma = 2.0;
     double rho   = 0.5;
     double sigma = 0.5;
-    
+
     // DECLARE ALL THE VARIABLES AND POINTERS NEEDED
-    unsigned dimSimp = dimSpace + 1;             // Dimension of the simplex 
-    double noImprThreshold = 1e-8;               // Non improvement threshold 
-    unsigned noImprovBreak = 100;                // Maximum iterations without improvement
-    
+    unsigned dimSimp = dimSpace + 1;        // Dimension of the simplex
+    double noImprThreshold = 1e-8;          // Non improvement threshold
+    unsigned noImprovBreak = 100;           // Maximum iterations without improvement
+
     double lowestValue;                     // Best value achieved
     double refEval;                         // Image of the reflection point
     double expEval;                         // Image of the expansion point
     double conEval;                         // Image of the contraction point
 
     // AUXILIAR VARIABLES AND POINTERS NEEDED
-    double* newPoint = new double[dimSpace];        // Needed to generate the initial simplex
-    double* cenPoint = new double[dimSpace];        // Centroid point of the simplex
-    double* xRef = new double[dimSpace];            // Reflection point of the simplex
-    double* xExp = new double[dimSpace];            // Expansion point of the simplex
-    double* xCon = new double[dimSpace];            // Contraction point of the simplex
-    double* xRed = new double[dimSpace];            // Reduction point of the simplex
+    double* newPoint = new double[dimSpace]; // Needed to generate the initial simplex
+    double* cenPoint = new double[dimSpace]; // Centroid point of the simplex
+    double* xRef = new double[dimSpace];     // Reflection point of the simplex
+    double* xExp = new double[dimSpace];     // Expansion point of the simplex
+    double* xCon = new double[dimSpace];     // Contraction point of the simplex
+    double* xRed = new double[dimSpace];     // Reduction point of the simplex
 
     double valFunc = chiSquare(f, initGuess, xData, yData, yError, matVec );
 
@@ -158,18 +189,20 @@ struct GetVal fitNM( TargetFunc f,
     double* optmPoint = new double[dimSimp*dimSpace];
 
     // INITIATE THE ALGORITHM
-    
+
     // GENERATE THE INITIAL SIMPLEX USING THE initGuess given
     double* imPoints = new double[dimSimp*dimSpace];
     double* imValues = new double[dimSimp];
 
-    for( unsigned i = 0; i < dimSimp; i++ ) { 
-        if( i == 0 ) {                              // Substitute initGuess into the simplex
+    for( unsigned i = 0; i < dimSimp; i++ ) {
+        // Substitute initGuess into the simplex
+        if( i == 0 ) {
             imValues[i] = valFunc;
-            for( unsigned j = 0; j < dimSpace; j++ ) 
+            for( unsigned j = 0; j < dimSpace; j++ )
                 imPoints[i*dimSpace+j] = initGuess[j];
         }
-        else {                                      // Generate a simplex around initGuess
+        // Generate a simplex around initGuess
+        else {
             for( unsigned j = 0; j < dimSpace; j++ ) {
                 newPoint[j] = initGuess[j] + expGuess[j] * dist(rng);
                 imPoints[i*dimSpace+j] = newPoint[j];
@@ -177,96 +210,100 @@ struct GetVal fitNM( TargetFunc f,
             imValues[i] = chiSquare( f, newPoint, xData, yData, yError, matVec );
         }
     }
-    
+
     unsigned noImprov = 0;
     unsigned iterStep = 0;
     while( 1 ) {
-        
+
         // CALCULATE THE VALUE OF THE FUNCTION EACH STEP
-        for( unsigned i = 0; i <  dimSimp; i++ ) { 
+        for( unsigned i = 0; i <  dimSimp; i++ ) {
             for( unsigned j = 0; j < dimSpace; j++ ) {
                 newPoint[j] = imPoints[i*dimSpace+j];
             }
-            imValues[i] = chiSquare( f, newPoint, xData, yData, yError, matVec ); 
+            imValues[i] = chiSquare( f, newPoint, xData, yData, yError, matVec );
         }
-          
+
         // SORT VALUES USING THE FUNCTIONS CREATED
         orderSimplex( imPoints, imValues, dimSpace );
-        
+
         // CONTROL THE ALGORITHM
-        if( maxIter and iterStep >= maxIter ) {     // Break if maximum iteration value is achieved
+
+        // Break if maximum iteration value is achieved
+        if( maxIter and iterStep >= maxIter ) {
             for( unsigned i = 0; i < dimSpace; i++ ) {
                 optmPoint[i] = imPoints[i];
             }
             GetVal r = { optmPoint, imValues[0] };
-            // std::cout << "Number of iterations: " << iterStep << std::endl;
             return r;
         }
         iterStep += 1;
-        
-        if( lowestValue < valFunc - noImprThreshold ) {     // Control the non-improvement
+
+        // Control the non-improvement
+        if( lowestValue < valFunc - noImprThreshold ) {
             noImprov = 0;
             valFunc = lowestValue;
         }
-        else 
+        else
             noImprov += 1;
-        
-        if( noImprov >= noImprovBreak ){                    // Break if we do not improve results
+
+        // Break if we do not improve results
+        if( noImprov >= noImprovBreak ){
             for( unsigned i = 0; i < dimSpace; i++ )
                 optmPoint[i] = imPoints[i];
             GetVal r = { optmPoint, imValues[0] };
-            // std::cout << "Number of iterations: " << iterStep << std::endl;
             return r;
         }
-        
+
         // CALCULATE THE CENTROID OF THE BEST N POINTS
         centrMat( cenPoint, imPoints, dimSpace );
-        
+
         // REFLECTION PART OF THE ALGORITHM
-        for( unsigned i = 0; i < dimSpace; i++ ) 
-            xRef[i] = cenPoint[i] + alpha * ( cenPoint[i] - imPoints[(dimSimp-1)*dimSpace+i] );
+        for( unsigned i = 0; i < dimSpace; i++ )
+            xRef[i] = cenPoint[i] + alpha * ( cenPoint[i] -
+                                imPoints[(dimSimp-1)*dimSpace+i] );
         refEval = chiSquare( f, xRef, xData, yData, yError, matVec );
 
         if( imValues[0] <= refEval and refEval < imValues[dimSimp-2] ) {
-            for( unsigned i = 0; i < dimSpace; i++ ) 
+            for( unsigned i = 0; i < dimSpace; i++ )
                 imPoints[(dimSimp-1)*dimSpace+i] = xRef[i];
             continue;
         }
-        
+
         // EXPANSION PART OF THE ALGORITHM
         if( refEval < imValues[0] ) {
-            for( unsigned i = 0; i < dimSpace; i++ ) 
+            for( unsigned i = 0; i < dimSpace; i++ )
                 xExp[i] = cenPoint[i] + gamma * ( xRef[i] - cenPoint[i] );
             expEval = chiSquare( f, xRef, xData, yData, yError, matVec );
 
             if( expEval < refEval ) {
-                for( unsigned i = 0; i < dimSpace; i++ ) 
+                for( unsigned i = 0; i < dimSpace; i++ )
                     imPoints[(dimSimp-1)*dimSpace+i] = xExp[i];
                 continue;
             }
             else {
-                for( unsigned i = 0; i < dimSpace; i++ ) 
+                for( unsigned i = 0; i < dimSpace; i++ )
                     imPoints[(dimSimp-1)*dimSpace+i] = xRef[i];
                 continue;
             }
         }
-        
+
         // CONTRACTION PART OF THE ALGORITHM
         for( unsigned i = 0; i < dimSpace; i++ )
-            xCon[i] = cenPoint[i] + rho * ( imPoints[(dimSimp-1)*dimSpace+i] - cenPoint[i] );
+            xCon[i] = cenPoint[i] + rho * ( imPoints[(dimSimp-1)*dimSpace+i] -
+                      cenPoint[i] );
         conEval = chiSquare( f, xCon, xData, yData, yError, matVec );
-        
+
         if( conEval < imValues[dimSimp-1] ) {
             for( unsigned i = 0; i < dimSpace; i++ )
                 imPoints[(dimSimp-1)*dimSpace+i] = xCon[i];
             continue;
         }
-        
+
         // SHRINK PART OF THE ALGORITHM
         for( unsigned i = 1; i < dimSimp; i++ ) {
             for( unsigned j = 0; j < dimSpace; j++ ) {
-                imPoints[i*dimSpace+j] = imPoints[j] + 
-                                         sigma * ( imPoints[i*dimSpace+j] - imPoints[j] );
+                imPoints[i*dimSpace+j] = imPoints[j] +
+                            sigma * ( imPoints[i*dimSpace+j] - imPoints[j] );
             }
         }
     }   // END OF WHILE
@@ -275,16 +312,22 @@ struct GetVal fitNM( TargetFunc f,
 
 void centrMat( double* cenPoint, double* inMat, const unsigned dimSpace ) {
     /*
-     * double* cenPoint : pointer to double array that will contain the centroid of the matrix
-     * double* inMat    : input matrix to calculate the centroid. It calculates the mean value of
-     *                    each column averaging over all the rows at fixed column.
-     * int dimSpace     : integer containing the dimension of the parameter space
-     */
+       Function to generate the centroid of the simplex. The centroid is
+       defined as the average of all the components of a column.
+
+        Args:
+            double*:
+                Pointer that will contain the centroid of the simplex.
+            double*:
+                Input simplex coordinates to calculate the centroid.
+            const unsigned:
+                Dimension of the parameter space.
+    */
 
     int dimSimp = dimSpace + 1;
     double centVal = 0.0;
-    
-    for( unsigned i = 0; i < dimSpace; i++ ) { 
+
+    for( unsigned i = 0; i < dimSpace; i++ ) {
         for( unsigned j = 0; j < dimSimp - 1; j++ ) {
             centVal += inMat[j*dimSpace+i];
         }
@@ -293,13 +336,23 @@ void centrMat( double* cenPoint, double* inMat, const unsigned dimSpace ) {
     }
 }
 
-void reordMat( double* inMat, double* auxMat, const unsigned* auxColoc, const unsigned dimSpace ) {
-    /* 
-     * double* inMat      : pointer to array that contains the input matrix to reorder
-     * double* auxMat     : auxiliar matrix used to reorder the input matrix
-     * unsigned* auxColoc : array containing the new locations of each row
-     * int dimSpace       : integer containing the dimension of the parameter space
-     */
+void reordMat( double* inMat, double* auxMat,
+               const unsigned* auxColoc, const unsigned dimSpace ) {
+    /*
+        Function to reorder a matrix given a vector containing the order
+        specified by row.
+
+        Args:
+            double*:
+                Input matrix to be reordered.
+            double*:
+                Auxiliar matrix used to reorder the input matrix.
+            const unsigned*:
+                Array containing the new locations of each row.
+            const unsigned:
+                Dimension of the matrix, that is, number of rows of the
+                matrix to be reordered.
+    */
 
     int dimSimp = dimSpace + 1;
     for( unsigned i = 0; i < dimSimp; i++ ) {
@@ -307,25 +360,34 @@ void reordMat( double* inMat, double* auxMat, const unsigned* auxColoc, const un
             auxMat[i*dimSpace+j] = inMat[auxColoc[i]*dimSpace+j];
         }
     }
-    
-    for( unsigned i = 0; i < dimSimp * dimSpace; i++ ) 
+
+    for( unsigned i = 0; i < dimSimp * dimSpace; i++ )
         inMat[i] = auxMat[i];
-} 
+}
 
 void orderSimplex( double* imPoints, double* evSimp, const unsigned dimSpace ) {
     /*
-     * double* imPoints   : input pointer containing the matrix that we want to sort ascendent
-     * double* evSimp     : input pointer containing the evaluation of the simplex in the function
-     * int dimSpace       : integer containing the dimension of the parameter space
-     */
+        Function to reorder a matrix given a metric. The sorting is done in
+        ascendent order.
+
+        Args:
+            double*:
+                Input pointer to be sorted ascendently.
+            double*:
+                Input pointer containing the metric that dictates the order
+                to sort the input pointer.
+            const unsigned:
+                Dimension of the matrix, that is, number of rows of the
+                matrix to be reordered.
+    */
 
     int dimSimp = dimSpace + 1;
 
     unsigned* auxColoc = new unsigned[dimSimp];
     // Collocation auxiliar pointer
-    for( unsigned i = 0; i < dimSimp; i++ ) 
+    for( unsigned i = 0; i < dimSimp; i++ )
         auxColoc[i] = i;
-    
+
     // Ascendant order of evSimp
     double tempVarA;
     unsigned tempVarB;
@@ -344,10 +406,9 @@ void orderSimplex( double* imPoints, double* evSimp, const unsigned dimSpace ) {
             }
         }
     }
-    
+
     double* auxMat = new double[dimSimp*dimSpace];
     reordMat( imPoints, auxMat, auxColoc, dimSpace );
 }
-    
-    
+
 #endif

@@ -1,8 +1,6 @@
-//------------------------------------------------------------------------------------------------//
 //    AUTHOR : SERGIO CHAVES GARCÍA-MASCARAQUE
 //    E-MAIL : SERGIOZTESKATE@GMAIL.COM
 //    DICIEMBRE DE 2018, SWANSEA, WALES - MADRID, SPAIN
-//------------------------------------------------------------------------------------------------//
 
 
 #ifndef LOAD_H
@@ -31,22 +29,29 @@ struct myMat getLargeData( const char* fileName,
                            const double resFactor = NOTUSE,
                            std::string commChar = "#" ) {
     /*
-     * Function to read large data files. It needs the number of rows and column
-     * included in the file to work. It reads the file as a matrix with dimension
-     * rowSize * colSize
-     *
-     * Args:
-     * const char*      : Name of the file to extract
-     * const int        : Number of rows contained in the file
-     * const int        : Number of columns contained in the file
-     * std::string      : Comment character. It must be at the beginning of the line
-     *                    and just one character in each comment. Therefore '#' works,
-     *                    '##' will not work.
-     *
-     * Return:
-     * struct myMat     : Structure containing the data extracted from the file and its
-     *                    properties.
-     */
+       Function to read large data files and avoid memory problems.
+
+        Args:
+            const char*:
+                Name of the file to load.
+            const unsigned:
+                Number of rows in the file.
+            const unsigned:
+                Number of columns in the file.
+            const unsigned:
+                Control variable to rescale a column by a factor.
+            const unsigned:
+                Column to be rescaled.
+            const double:
+                Value to rescale a column with.
+            std::string:
+                String to skip lines beginning with the provided value.
+
+        Return:
+            struct myMat:
+                Structure containing the content of the file.
+                Value to multiply every value in a column.
+    */
 
     if( RESCALE == NOTUSE ) {
         std::ifstream fileStream(fileName);
@@ -90,7 +95,8 @@ struct myMat getLargeData( const char* fileName,
             if( arrayTokens[0] != commChar ) {
                 for( int i = 0; i < arrayTokens.size(); i++ ) {
                     if( i == colRescale )
-                        dataStore[rowAux*colSize+i] = resFactor * std::stod( arrayTokens[i] );
+                        dataStore[rowAux*colSize+i] = resFactor *
+                                std::stod( arrayTokens[i] );
                     else
                         dataStore[rowAux*colSize+i] = std::stod( arrayTokens[i] );
                 }
@@ -106,18 +112,20 @@ struct myMat getLargeData( const char* fileName,
 
 struct myMat loadData( const char* fileName, const char* compChar = "#" ) {
     /*
-     * Function to loadData automatically, it generates an structure containing the
-     * data and the number of rows and columns. The function does not work for large
-     * data files as it copies a vector iteratively.
-     *
-     * Args:
-     * const char*      : Name of the file that we want to load
-     * const char*      : Comment character in the file to be skipped. Note that the
-     *                    character must be located at the beginning and just one char
-     *
-     * Return:
-     * struct myMat     : Structure containing the data and its properties.
-     */
+       Function to read a file automatically. It does not need the size of
+       the data file to be read.
+
+        Args:
+            const char*:
+                Name of the file to load.
+            std::string:
+                String to skip lines beginning with the provided value.
+
+        Return:
+            struct myMat:
+                Structure containing the content of the file.
+                Value to multiply every value in a column.
+    */
 
     std::ifstream fileStream(fileName);
 
@@ -150,8 +158,6 @@ struct myMat loadData( const char* fileName, const char* compChar = "#" ) {
                     double* tempArr = new double[numPoints+1];
                     colSize += 1;
 
-                    // vecStorage grows from file
-                    // Copy from vecStorage to vecStorage + numPoints the array tempArray
                     std::copy( vecStrorage, vecStrorage + numPoints, tempArr );
                     tempArr[numPoints] = xTemp;
                     vecStrorage = tempArr;
@@ -183,18 +189,23 @@ struct myMat sliceCol( myMat inMatrix,
                       const unsigned iniPos = 0,
                       unsigned finPos = 0 ) {
     /*
-     * Function to slice a data matrix at one row. It needs data contained inside
-     * a structure myMat.
-     *
-     * Args:
-     * struct myMat     : Structure containing the data matrix to be sliced
-     * const unsigned   : Column in the data to be extracted
-     * const unsigned   : Initial row to be extracted
-     * unsigned         : Final row to be extracted
-     *
-     * Return:
-     * struct myMat     : Stucture containing a vector with the sliced data
-     */
+       Function to slice a column from a myMat structure.
+
+        Args:
+            myMat:
+                Structure containg the data to be sliced.
+            const unsiged:
+                Column to be sliced.
+            const unisgned:
+                Initial row to be sliced.
+            unsigned:
+                Final positin to be sliced.
+
+        Return:
+            struct myMat:
+                Structure containing the sliced column from the initial
+                myMat structure.
+    */
 
     unsigned rowSize = inMatrix.rowSize;
     unsigned colSize = inMatrix.colSize;
