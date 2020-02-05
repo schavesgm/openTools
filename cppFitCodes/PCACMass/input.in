@@ -1,0 +1,19 @@
+fileAP Gen2l_128x32.meson.ap.uu
+filePP Gen2l_128x32.meson.pp.uu
+fileAA Gen2l_128x32.meson.aa.uu
+
+savePCAC resPCAC_Mass.dat
+savePP bestEstimate_pp.dat
+saveAA bestEstimate_aa.dat
+
+// Properties of the data file
+params 313344 3 128
+
+rescaleOrNot 0
+rescaledColumn 1
+rescaledFactor 1e15
+
+numBootstrap 10000
+initSeed 556379128
+
+
