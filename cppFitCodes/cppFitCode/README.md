@@ -19,7 +19,7 @@ mpic++ getData.cpp/fitMain.cpp -o nameProgram.out
 And to run it you would use
 
 ```bash
-mpiexec -n $N_proc ./nameProgram.out inputFile.in
+mpiexec -n N_proc ./nameProgram.out inputFile.in
 ```
 
 The script named *convergeFit.sh* allows you to generate an interative

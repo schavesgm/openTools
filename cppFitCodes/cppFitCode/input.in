@@ -1,6 +1,6 @@
 // File containing the data to fit. The data to fit must be
 // positioned in the second column of the data
-fileName fakeData.dat
+fileName Gen2l_48x32.meson.g5.cc
 
 // Calculate the best estimation of the fit when using 'fitMain.cpp'.
 // Use 0 for NO, else for YES. Note that you can generate the data
@@ -10,8 +10,8 @@ calculateBest 0
 // File containing the best estimation of the data to fit.
 saveName bestEstimate.dat
 
-// Properties of the data file
-paramsFile 16 2 4
+// Number of rows, number of cols and timePoints in data file
+paramsFile 106752 3 48
 
 // Binning size used in the calculation, note that it must be a number
 // such that numRows / binSize is an integer
