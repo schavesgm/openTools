@@ -1,7 +1,7 @@
 #!/bin/bash
 
 NT=( 128 64 56 48 40 36 32 28 24 20 16 )
-chan="axConc"
+chan="tespConc"
 
 for nt in ${NT[@]}
 do

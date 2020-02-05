@@ -1,0 +1,53 @@
+// File containing the data to fit. The data to fit must be
+// positioned in the second column of the data
+fileName fakeData.dat
+
+// Calculate the best estimation of the fit when using 'fitMain.cpp'.
+// Use 0 for NO, else for YES. Note that you can generate the data
+// independently using the script 'getData.cpp' to recycle it.
+calculateBest 0
+
+// File containing the best estimation of the data to fit.
+saveName bestEstimate.dat
+
+// Properties of the data file
+paramsFile 16 2 4
+
+// Binning size used in the calculation, note that it must be a number
+// such that numRows / binSize is an integer
+binSize 1
+
+// Get fancy results on screen or just get the parameters, errors and chiSquare.
+// Use zero to get just the parameters and one to get the fancy output
+printFancy 0
+
+// Window at which we would like to fit. If the last point is less or equal
+// than the first one, last point would be equal to timePoints. It fits until
+// the last point minus 1 - example: 1 - 20 will fit from 1 to 19
+windowFit 0 0
+
+// Rescale numbers in the calculation to allow fitting of data when the
+// numbers are small. Use rescaledOrNot = 1 to rescale, 0 to not scale
+rescaleOrNot 0
+rescaledColumn 1
+rescaledFactor 1e15
+
+// Properties of the fit. Use the rescaled factor in the data
+dimParam 2
+initGuess 1 1
+explGuess 1 1
+
+// Largest reduced chi-Square accepted, chiSquare / ( nPoints - dPar )
+largestChiSquare 10
+
+// Definiton of the chiSquare function used. Use 0 for a errorFunction, use 1
+// for a maximum likelihood approach with weighted errors
+defChiSquare 0
+
+// Number of boostrap iterations. Each rank will calculate numBoot / numProcessor
+numBootstrap 5000
+
+// Initial seed to generate random numbers
+initSeed 26465
+
+
