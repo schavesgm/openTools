@@ -17,14 +17,9 @@ and grant it executable permissions,
 ```bash
 sudo chmod +x /usr/bin/gnp2tex
 ```
-If you wanted to use it, just run it using,
+The instructions on how to use it can be achieved using,
 
 ```bash
-gnp2tex nameFile.gn namePDF.pdf
+gnp2tex -h
 ```
-The first argument is the name of the file to process, the second is the name
-of the pdf to be created. The second argument is optional, if it is not set,
-then **gnp2tex** will create a pdf file named **nameFile.pdf**. You can try
-the script on the file **trialPlot.gn** and it should produced a plot containing
-two harmonic functions.
 

@@ -7,8 +7,36 @@
 # This script is a modification of the previous gnp2tex
 # Now it just relies on gnuplot commands, not latex
 
-nameGnuplot="$1"
-savePDF="$2"
+print_usage() {
+    printf  "Usage: Script to transform gnuplot plots into pdf with LaTeX
+       standalone content.
+
+       Usage:
+           gnp2tex -f fileName.gn \\\\
+                   -s myPDF.pdf \\\\
+                   -p '\\\\usepackage{myPackage};\\\\usepackage{myOtherPackage}\\...'
+
+       Args:
+           -h: Print help.
+           -f: Gnuplot file to be compiled into pdf.
+           -s [Optional]: Name of the pdf output. If not provided, the name
+                          will be the name of the file ending with .pdf
+           -p [Optional]: LaTeX packages to be included in the compilation.\n"
+}
+
+while getopts 'f:s:p:h' flag; do
+    case "${flag}" in
+        f) nameGnuplot="${OPTARG}" ;;
+        s) savePDF="${OPTARG}" ;;
+        p) packages="${OPTARG}" ;;
+        h) print_usage exit 1;;
+    esac
+done
+
+if [ -z "${nameGnuplot}" ]; then
+    echo "ERROR: Name of the file (-f) argument is not provided."
+    exit 1
+fi
 
 echo "
 # Set the terminal to produce the latex results
@@ -28,6 +56,21 @@ cat ${nameGnuplot} >> ./wrapper.gn
 
 # Produce the figure file
 gnuplot ./wrapper.gn
+
+# Include packages inside the file
+if [ "${packages}" ]; then
+    lineApp=$( grep -nr 'usepackage\[active,tightpage\]{preview}' temp.tex | \
+               cut -d : -f -1 )
+    # # Format by lines
+    packages=$( echo $packages | tr ";" "\n" )
+    auxVar="1"
+    for comm in ${packages[@]}
+    do
+        line=$(( $lineApp + $auxVar ))
+        sed -i "${line}i\\\\${comm}" temp.tex
+        auxVar=$(( $auxVar + 1 ))
+    done
+fi
 
 # Produce the pdf file
 pdflatex ./temp.tex
