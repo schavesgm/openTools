@@ -4,15 +4,23 @@ This repository contains scripts used to produce and analyse data from the FASTS
 collaboration. It is intended to be a collection of independent folders. In each
 folder, there should be a fully functional collection of scripts.
 
+Some folders are submodules, in order to fetch those repositories, you do need to
+use,
+
+```bash
+git submodule init
+git submodule update
+```
+
 ---
 ## concatenateOpenQCD
 Scripts to concatenate openQCD correlation function data into a single file. Each 
 file will contain ``N_C x N_S`` statistics of the particle to be analysed.
 
-## run_scan
+## run_scan -- Submodule
 Collection of scripts to run jobs on the server using a better approach than the 
 one inside ``cppFitCode/scanRunServer``. The code is way more mantainable and 
-extendable with.
+extendable. It is
 
 ## extractEffMass
 Collection of scripts to extract the effective mass solving the cosh function and 
