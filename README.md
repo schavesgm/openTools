@@ -26,7 +26,7 @@ extendable. It is
 Collection of scripts to extract the effective mass solving the cosh function and 
 plotting the data into a pdf using ``gnp2tex``.
 
-## gnp2tex
+## gnp2tex -- Submodule
 Program to transform gnuplot files to standalone pdf files with LaTeX style.
 
 ## cppFitCodes
