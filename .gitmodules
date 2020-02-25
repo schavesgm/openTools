@@ -1,3 +1,6 @@
 [submodule "run_scan"]
     path = run_scan
     url = git@github.com:schavesgm/run_scan.git 
+[submodule "gnp2tex"]
+    path = gnp2tex
+    url = git@github.com:schavesgm/gnp2tex.git 
