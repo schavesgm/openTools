@@ -1,12 +1,12 @@
 # GNP2TEX
 
-*gnp2tex* is a tool to convert gnuplot plots to LaTeX style. It works using
-**luaTeX** and **pdflatex** to transform a script written in gnuplot to a
+``gnp2tex`` is a tool to convert gnuplot plots to LaTeX style. It works using
+``luaTeX`` and ``pdflatex`` to transform a script written in gnuplot to a
 pdf standalone file.
 
 ## Usage:
 
-In order to run **gnp2tex**, first copy your file into /usr/bin/ to have the
+In order to run ``gnp2tex``, first copy your file into ``/usr/bin/`` to have the
 command available,
 
 ```bash
