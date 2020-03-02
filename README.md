@@ -13,9 +13,10 @@ git submodule update
 ```
 
 ---
-## concatenateOpenQCD
-Scripts to concatenate openQCD correlation function data into a single file. Each 
-file will contain ``N_C x N_S`` statistics of the particle to be analysed.
+## concatenate_hadspec -- Submodule
+Scripts to concatenate Fastum hadspec correlation function data into a single file. 
+Each file will contain ``N_C x N_S`` statistics of the particle to be analysed. The
+scripts support mesons and baryons.
 
 ## run_scan -- Submodule
 Collection of scripts to run jobs on the server using a better approach than the 
