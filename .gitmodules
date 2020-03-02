@@ -4,3 +4,6 @@
 [submodule "gnp2tex"]
     path = gnp2tex
     url = git@github.com:schavesgm/gnp2tex.git 
+[submodule "concatenate_hadspec"]
+    path = concatenate_hadspec
+    url = git@github.com:schavesgm/concatenate_hadspec.git 
