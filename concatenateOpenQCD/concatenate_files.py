@@ -7,7 +7,6 @@ import numpy as np
 import pandas as pd
 import sys, os, re
 
-
 def read_directory(directory):
     """
         Read the files in a directory assumed to collect openQCD hadspec files

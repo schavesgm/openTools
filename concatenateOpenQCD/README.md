@@ -1,4 +1,5 @@
 # Concatenate openQCD files
+# -- 
 
 Script to concatenate openQCD files into a single file. The script generates
 a file for each particle with a given gamma structure and external momenta.
