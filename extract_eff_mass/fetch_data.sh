@@ -17,7 +17,7 @@ function gen_plot() {
 chan=$1; meson=$2; nt=$3; sourc=$4; output_file=$5
 
 echo "
-set style line 2 lc rgb '#5e9c36' pt 6 ps 1 lt 1 lw 2
+set style line 1 lc rgb '#5e9c36' pt 6 ps 1 lt 1 lw 2
 
 set style line 11 lc rgb '#808080' lt 1
 set border 3 back ls 11
