@@ -62,12 +62,15 @@ do
 
         cd ${CHANNEL}/${meson}/${nt}x32/${type}/
         name_conf=$( ls Gen2l* )
-        output_file="effMass_${type}_${nameFile}"
+        output_file="effMass_${1}_${type}_${nt}x32.${meson}"
 
         python ./extract_cosh_mass.py ${name_conf} ${output_file}
 
         gen_plot $1 $meson $nt $type $output_file
         gnp2tex -f plot.gn -s $1_effMass_${nt}x32_${type}_${meson}.pdf
+
+        # Remove unneeded files
+        rm extract_cosh_mass.py Gen2l_* plot.gn
 
         cd $ROOT 
         done
