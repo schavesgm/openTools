@@ -35,10 +35,12 @@ plot '${output_file}' u 1:2:3 w yerr ls 1 notitle
 }
 
 SCW="/home/s.989336/Analyse_Corrs/data"
+ROOT=$( pwd )
 
 for nt in ${NT[@]}
 do
 
+    echo "I am currently calculating $nt"
     for meson in ${MESON[@]}
     do
         # Create the folder that will hold the results
@@ -47,8 +49,10 @@ do
         # Loop over sources ll and ss
         for type in ll ss
         do
+
+            echo "I am inside $meson - $type"
             # Copy the file into the folder
-            loc="$SCW/${nt}x32/concMeson.cc/${type}/${fold}_Folder/*"
+            loc="$SCW/${nt}x32/concMeson.${meson}/${type}/${fold}_*/*"
             mkdir -p ${CHANNEL}/${meson}/${nt}x32/${type}
             scp scw:${loc} ${CHANNEL}/${meson}/${nt}x32/${type}
 
@@ -63,9 +67,9 @@ do
         python ./extract_cosh_mass.py ${name_conf} ${output_file}
 
         gen_plot $1 $meson $nt $type $output_file
-        gnp2tex plot.gn $1_effMass_${nt}x32_${type}_${meson}.pdf
+        gnp2tex -f plot.gn -s $1_effMass_${nt}x32_${type}_${meson}.pdf
 
-        cd ../../
+        cd $ROOT 
         done
     done
 done
