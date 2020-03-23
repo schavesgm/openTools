@@ -146,6 +146,6 @@ if __name__ == '__main__':
     fileSave = sys.argv[2]
 
     anlzFile = CorrAnlz( fileName )
-    massData = anlzFile.bootstrap_effMass( numBoots = 1000 )
+    massData = anlzFile.bootstrap_effMass( numBoots = 500 )
     anlzFile.flush_data( massData, fileSave )
 
