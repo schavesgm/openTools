@@ -13,7 +13,8 @@ class CorrAnlz:
 
     def bootstrap_corr( self, numBoots ):
         """
-            Generate the estimation of the correlation function using bootstrap
+            Generate the estimation of the correlation function using
+            bootstrap
         """
         buffBoots = np.empty( self.NT * numBoots )
         for nB in range( numBoots ):
@@ -30,7 +31,8 @@ class CorrAnlz:
 
     def bootstrap_effMass( self, numBoots ):
         """
-            Generate the estimation of the effective mass using bootstrap
+            Generate the estimation of the effective mass using
+            bootstrap
         """
         halfNT = int( self.NT / 2 - 1 )
         buffBoots = np.empty( halfNT * numBoots )
@@ -50,7 +52,8 @@ class CorrAnlz:
 
     def flush_data( self, data, nameFile ):
         """
-            Flush a 2-dimensional array into a file with name nameFile
+            Flush a 2-dimensional array into a file with name
+            nameFile
         """
         file = open( nameFile, "w" )
         file.write( '#\t\\tau\tData\tDelta(Data)\n' )
@@ -62,7 +65,8 @@ class CorrAnlz:
 
     def __res_estimate( self ):
         """
-            Calculate a resampled estimation of the correlation function data
+            Calculate a resampled estimation of the correlation
+            function data
         """
 
         # Buffer to save the resampled data
@@ -80,7 +84,8 @@ class CorrAnlz:
             Calculate the effective mass for a given resample
         """
 
-        def fCosh( meff, nt, corrData ):    # Function to find the roots to
+        def fCosh( meff, nt, corrData ):    
+            # Function to find the roots to
             coshPart = np.cosh( meff * ( nt - self.NT / 2 ) ) / \
                        np.cosh( meff * ( nt + 1 - self.NT / 2 ) )
             dataPart = corrData[nt] / corrData[nt+1]
@@ -105,8 +110,8 @@ class CorrAnlz:
 
     def __avg( self, data, ntMax, numCopies ):
         """
-            Function to calculate the average over an array with numCopies copies
-            of ntMax data
+            Function to calculate the average over an array with
+            numCopies copies of ntMax data
         """
         buffAvg = np.empty( ntMax )
         auxAvg = 0
@@ -119,14 +124,16 @@ class CorrAnlz:
 
     def __std( self, data, avgData, ntMax, numCopies ):
         """
-            Function to calculate the standard deviation on a array known the average.
-            The array contains numCopies copies of ntMax data
+            Function to calculate the standard deviation on a array
+            known the average.  The array contains numCopies copies
+            of ntMax data
         """
         buffStd = np.empty( ntMax )
         auxStd = 0
         for nt in range( ntMax ):
             for nC in range( numCopies ):
-                auxStd += ( data[ nC * ntMax + nt ] - avgData[nt] ) ** 2
+                auxStd += \
+                    ( data[ nC * ntMax + nt ] - avgData[nt] ) ** 2
             buffStd[nt] = np.sqrt( auxStd / ( numCopies - 1 ) )
             auxStd = 0
         return buffStd
@@ -141,7 +148,4 @@ if __name__ == '__main__':
     anlzFile = CorrAnlz( fileName )
     massData = anlzFile.bootstrap_effMass( numBoots = 1000 )
     anlzFile.flush_data( massData, fileSave )
-
-
-
 
