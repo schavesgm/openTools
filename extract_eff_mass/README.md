@@ -9,6 +9,8 @@ all types of sources available. In order to run the script, use
 ```bash
 bash fetch_data.sh name_channel
 ```
-where `name_channel` can be `g5, vec, ax_plus, ax_minus, g0`. 
+where `name_channel` can be `g5, vec, ax_plus, ax_minus, g0`. The
+produced is stored in a folder and separated into flavors ->
+temperature -> source.
 
 
